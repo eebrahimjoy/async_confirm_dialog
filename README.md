@@ -16,7 +16,7 @@ The example app running on iOS:
 
 | Demo 1 | Demo 2 |
 | ------ | ------ |
-| ![async_confirm_dialog demo](assets/gif/example1.gif) | ![async_confirm_dialog demo](assets/gif/example2.gif) |
+| ![async_confirm_dialog demo](https://raw.githubusercontent.com/eebrahimjoy/async_confirm_dialog/main/assets/gif/example1.gif) | ![async_confirm_dialog demo](https://raw.githubusercontent.com/eebrahimjoy/async_confirm_dialog/main/assets/gif/example2.gif) |
 
 Tap any tile in the example to try the dialogs: standard confirms, destructive
 actions, async failures, and fully custom styles.
