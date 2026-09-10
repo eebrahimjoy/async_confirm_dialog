@@ -1,3 +1,11 @@
+## 1.0.4
+
+- Package metadata and documentation polish. No API changes.
+
+## 1.0.3
+
+- Documentation refinements. No API changes.
+
 ## 1.0.2
 
 - Compress the demo GIFs so they render in the README on GitHub and pub.dev.
