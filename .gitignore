@@ -1,0 +1,17 @@
+# Dart / Flutter generated artifacts
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Android / iOS / web build outputs
+.android/
+.ios/
+.idea/
+*.iml
+
+# Avoid committing the pubspec.lock for library packages.
+pubspec.lock
+
+# macOS / OS junk
+.DS_Store

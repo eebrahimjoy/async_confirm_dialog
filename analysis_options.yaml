@@ -1,0 +1,20 @@
+# Static analysis configuration for the async_confirm_dialog package.
+#
+# This uses the flutter_lints ruleset, which is the recommended baseline for
+# Flutter packages and is what pub.dev uses when scoring packages.
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # Enforce public API documentation on all declarations.
+    - public_member_api_docs
+    # Prefer const constructors where possible.
+    - prefer_const_constructors
+    - prefer_const_declarations
+    # Avoid relative imports that escape the package.
+    - avoid_relative_lib_imports
+
+analyzer:
+  errors:
+    # Treat missing documentation as an error to keep docs complete.
+    public_member_api_docs: warning
