@@ -40,14 +40,10 @@ class MaterialConfirmDialogView extends StatelessWidget {
   /// Invoked when the cancel action is pressed.
   final VoidCallback onCancelPressed;
 
-  Color _resolveConfirmColor(BuildContext context, AsyncConfirmDialogStyle s) {
+  /// Background colour for the confirm action.
+  Color _resolveConfirmBackground(BuildContext context, AsyncConfirmDialogStyle s) {
     if (isDestructive) {
-      if (s.destructiveColor != null) {
-        return s.destructiveColor!;
-      }
-      if (s.titleColor != null || isDestructive) {
-        return Theme.of(context).colorScheme.error;
-      }
+      return s.destructiveColor ?? Theme.of(context).colorScheme.error;
     }
     return s.confirmColor ?? Theme.of(context).colorScheme.primary;
   }
@@ -61,8 +57,8 @@ class MaterialConfirmDialogView extends StatelessWidget {
     final titleStyle = (s.titleTextStyle ?? theme.textTheme.titleMedium)
         ?.copyWith(color: s.titleColor ?? scheme.onSurface);
     final messageColor = s.messageColor ?? scheme.onSurfaceVariant;
-    final confirmColor = _resolveConfirmColor(context, s);
-    final confirmTextColor = _textColorOn(confirmColor);
+    final confirmColor = _resolveConfirmBackground(context, s);
+    final onConfirmColor = _textColorOn(confirmColor);
 
     final titleAlign = s.titleAlign ?? TextAlign.start;
     final contentAlign = s.contentAlign ?? TextAlign.start;
@@ -105,12 +101,13 @@ class MaterialConfirmDialogView extends StatelessWidget {
               textStyle: s.actionTextStyle,
             ),
           ),
-        TextButton(
+        FilledButton(
           onPressed: isLoading ? null : onConfirmPressed,
-          style: TextButton.styleFrom(
-            foregroundColor: confirmTextColor,
-            backgroundColor: isLoading ? confirmColor.withValues(alpha: 0.1) : null,
-            disabledForegroundColor: confirmColor.withValues(alpha: 0.4),
+          style: FilledButton.styleFrom(
+            backgroundColor: confirmColor,
+            foregroundColor: onConfirmColor,
+            disabledBackgroundColor: confirmColor,
+            disabledForegroundColor: onConfirmColor,
             textStyle: s.actionTextStyle,
           ),
           child: AsyncActionContent(
@@ -118,7 +115,7 @@ class MaterialConfirmDialogView extends StatelessWidget {
             loadingLabel: dialog.loadingText,
             platform: DialogPlatform.material,
             isLoading: isLoading,
-            progressColor: confirmColor,
+            progressColor: onConfirmColor,
             textStyle: s.actionTextStyle,
           ),
         ),

@@ -8,6 +8,10 @@ import 'confirm_dialog_body.dart';
 
 /// Cupertino-specific rendering of an [AsyncConfirmDialog].
 ///
+/// Uses real [`CupertinoDialogAction`](https://api.flutter.dev/flutter/cupertino/CupertinoDialogAction-class.html)
+/// semantics so default/destructive/disabled states render with authentic
+/// platform colours that adapt to light and dark mode.
+///
 /// The view is stateless: all interactive state lives in the dialog's
 /// [State]. This widget is package-internal.
 class CupertinoConfirmDialogView extends StatelessWidget {
@@ -45,57 +49,42 @@ class CupertinoConfirmDialogView extends StatelessWidget {
     final s = dialog.style ?? const AsyncConfirmDialogStyle();
     final cupertinoTheme = CupertinoTheme.of(context);
 
-    final titleStyle = (s.titleTextStyle ??
-            cupertinoTheme.textTheme.textStyle.copyWith(
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-              color: CupertinoColors.black,
-            ))
-        .copyWith(color: s.titleColor);
-
     final titleAlign = s.titleAlign ?? TextAlign.center;
     final contentAlign = s.contentAlign ?? TextAlign.center;
 
-    final messageColor = s.messageColor ?? CupertinoColors.systemGrey;
+    final accent = isDestructive
+        ? (s.destructiveColor ?? CupertinoColors.systemRed)
+        : (s.confirmColor ?? cupertinoTheme.primaryColor);
 
     return CupertinoAlertDialog(
-      actions: _isErrorVisible(context)
-          ? [
-              CupertinoDialogAction(
-                isDefaultAction: false,
-                onPressed: onCancelPressed,
-                child: Text(dialog.cancelText, style: s.actionTextStyle),
-              ),
-            ]
-          : [
-              if (dialog.showCancelButton)
-                CupertinoDialogAction(
-                  isDefaultAction: false,
-                  onPressed: isLoading ? null : onCancelPressed,
-                  child: Text(dialog.cancelText, style: s.actionTextStyle),
-                ),
-              CupertinoDialogAction(
-                isDestructiveAction: isDestructive,
-                isDefaultAction: !isDestructive,
-                onPressed: isLoading ? null : onConfirmPressed,
-                child: AsyncActionContent(
-                  label: dialog.confirmText,
-                  loadingLabel: dialog.loadingText,
-                  platform: DialogPlatform.cupertino,
-                  isLoading: isLoading,
-                  progressColor: isDestructive
-                      ? CupertinoColors.systemRed
-                      : cupertinoTheme.primaryColor,
-                  textStyle: s.actionTextStyle ??
-                      TextStyle(
-                        color: isDestructive
-                            ? CupertinoColors.systemRed
-                            : cupertinoTheme.primaryColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              ),
-            ],
+      actions: [
+        if (dialog.showCancelButton)
+          CupertinoDialogAction(
+            isDefaultAction: false,
+            isDestructiveAction: false,
+            onPressed: isLoading ? null : onCancelPressed,
+            textStyle: s.actionTextStyle,
+            child: AsyncActionContent(
+              label: dialog.cancelText,
+              platform: DialogPlatform.cupertino,
+              isLoading: false,
+              textStyle: s.actionTextStyle,
+            ),
+          ),
+        CupertinoDialogAction(
+          isDefaultAction: !isDestructive,
+          isDestructiveAction: isDestructive,
+          onPressed: isLoading ? null : onConfirmPressed,
+          textStyle: s.actionTextStyle,
+          child: AsyncActionContent(
+            label: dialog.confirmText,
+            loadingLabel: dialog.loadingText,
+            platform: DialogPlatform.cupertino,
+            isLoading: isLoading,
+            progressColor: accent,
+          ),
+        ),
+      ],
       content: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -104,30 +93,31 @@ class CupertinoConfirmDialogView extends StatelessWidget {
             dialog.icon!,
             const SizedBox(height: 12),
           ],
-          if (dialog.title != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                dialog.title!,
-                textAlign: titleAlign,
-                style: titleStyle,
-              ),
+          if (dialog.title != null) ...[
+            Text(
+              dialog.title!,
+              textAlign: titleAlign,
+              style: (s.titleTextStyle ??
+                      cupertinoTheme.textTheme.textStyle.copyWith(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                      ))
+                  .copyWith(color: s.titleColor),
             ),
+            const SizedBox(height: 4),
+          ],
           ConfirmDialogBody(
             message: dialog.message,
             content: dialog.content,
             errorText: errorText,
             textAlign: contentAlign,
-            messageColor: messageColor,
+            messageColor: s.messageColor ?? CupertinoColors.secondaryLabel,
             messageTextStyle: s.messageTextStyle,
             errorTextStyle: s.errorTextStyle,
+            errorColor: CupertinoColors.systemRed,
           ),
         ],
       ),
     );
-  }
-
-  bool _isErrorVisible(BuildContext context) {
-    return errorText != null && errorText!.trim().isNotEmpty;
   }
 }

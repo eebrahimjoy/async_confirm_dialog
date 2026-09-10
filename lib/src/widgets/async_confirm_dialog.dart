@@ -165,7 +165,11 @@ class _AsyncConfirmDialogState extends State<AsyncConfirmDialog> {
       if (!mounted) {
         return;
       }
-      widget.onError?.call(error, stackTrace);
+      try {
+        widget.onError?.call(error, stackTrace);
+      } on Object {
+        // A failing error handler must not mask the dialog's own error state.
+      }
       if (widget.dismissOnError) {
         Navigator.of(context).pop(false);
         return;
@@ -185,11 +189,21 @@ class _AsyncConfirmDialogState extends State<AsyncConfirmDialog> {
     Navigator.of(context).pop(false);
   }
 
+  /// Turns a thrown [error] into a readable inline message.
+  ///
+  /// Exception-prefix noise such as `Exception: ` or `Bad state: ` is
+  /// stripped so the visible text is the actual human-readable message.
   String _formatError(Object error) {
-    final text = error.toString();
-    const exceptionPrefix = 'Exception: ';
-    if (text.startsWith(exceptionPrefix)) {
-      return text.substring(exceptionPrefix.length);
+    final text = error.toString().trim();
+    if (text.isEmpty) {
+      return 'An unexpected error occurred. Please try again.';
+    }
+    final separator = text.indexOf(': ');
+    if (separator > 0) {
+      final message = text.substring(separator + 2).trim();
+      if (message.isNotEmpty) {
+        return message;
+      }
     }
     return text;
   }

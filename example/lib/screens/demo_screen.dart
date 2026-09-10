@@ -1,7 +1,7 @@
 import 'package:async_confirm_dialog/async_confirm_dialog.dart';
 import 'package:flutter/material.dart';
 
-/// Main screen that lets the user trigger each flavour of confirmation dialog.
+/// Main screen with a demo tile for every flavour of confirmation dialog.
 class DemoScreen extends StatefulWidget {
   /// Creates the demo screen.
   const DemoScreen({super.key});
@@ -12,14 +12,16 @@ class DemoScreen extends StatefulWidget {
 
 class _DemoScreenState extends State<DemoScreen> {
   String _status = 'Tap a button below to try the dialogs.';
+  bool _statusIsError = false;
 
   void _setStatus(String message, {bool isError = false}) {
     setState(() {
       _status = message;
+      _statusIsError = isError;
     });
   }
 
-  /// Simulates an async operation that takes [delay].
+  /// Simulates an async operation that completes after [delay].
   Future<void> _fakeWork(Duration delay) async {
     await Future<void>.delayed(delay);
   }
@@ -49,6 +51,8 @@ class _DemoScreenState extends State<DemoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Async Confirm Dialog')),
       body: ListView(
@@ -59,7 +63,9 @@ class _DemoScreenState extends State<DemoScreen> {
               padding: const EdgeInsets.all(12),
               child: Text(
                 _status,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: _statusIsError ? colorScheme.error : null,
+                    ),
               ),
             ),
           ),
@@ -72,8 +78,7 @@ class _DemoScreenState extends State<DemoScreen> {
             onTap: () async {
               final confirmed = await context.confirm(
                 title: 'Save changes?',
-                message:
-                    'Your edits will be saved and shared with your team.',
+                message: 'Your edits will be saved and shared with your team.',
                 confirmText: 'Save',
                 onConfirm: _onStandardConfirm,
               );
@@ -89,7 +94,7 @@ class _DemoScreenState extends State<DemoScreen> {
           _ButtonTile(
             icon: Icons.delete_outline,
             title: 'Delete note',
-            subtitle: 'Shown in red, with a loading spinner in the button.',
+            subtitle: 'Red confirm button with an inline loading spinner.',
             onTap: () async {
               final confirmed = await context.confirm(
                 title: 'Delete this note?',
@@ -98,7 +103,8 @@ class _DemoScreenState extends State<DemoScreen> {
                 variant: ConfirmDialogVariant.destructive,
                 onConfirm: _onDelete,
                 onError: (error, stack) =>
-                    _setStatus('Delete failed: $error', isError: true),
+                    _setStatus('Could not delete the note. Please try again.',
+                        isError: true),
               );
               if (confirmed == true) {
                 _setStatus('The note was deleted.');
@@ -129,8 +135,7 @@ class _DemoScreenState extends State<DemoScreen> {
           _ButtonTile(
             icon: Icons.error_outline,
             title: 'Flaky action',
-            subtitle:
-                'Throws after a delay - the dialog catches it and stays open.',
+            subtitle: 'Throws after a delay - the dialog catches it.',
             onTap: () async {
               final confirmed = await context.confirm(
                 title: 'Run flaky action?',
@@ -138,7 +143,8 @@ class _DemoScreenState extends State<DemoScreen> {
                 confirmText: 'Run',
                 onConfirm: _onFlakyAction,
                 onError: (error, stack) =>
-                    _setStatus('Action failed: $stack', isError: true),
+                    _setStatus('The action failed. Please try again.',
+                        isError: true),
                 errorMessage: 'Something went wrong. Please try again.',
               );
               if (confirmed == true) {
@@ -146,12 +152,33 @@ class _DemoScreenState extends State<DemoScreen> {
               }
             },
           ),
+          _ButtonTile(
+            icon: Icons.refresh,
+            title: 'Retry after failure',
+            subtitle: 'dismissOnError closes the dialog when the action throws.',
+            onTap: () async {
+              final confirmed = await context.confirm(
+                title: 'Sync now?',
+                message: 'Syncing may fail if the network is down.',
+                confirmText: 'Sync',
+                onConfirm: _onFlakyAction,
+                dismissOnError: true,
+                onError: (error, stack) => _setStatus(
+                  'Sync failed and the dialog closed.',
+                  isError: true,
+                ),
+              );
+              if (confirmed == true) {
+                _setStatus('Synced.');
+              }
+            },
+          ),
           const SizedBox(height: 8),
-          const _SectionTitle('Fully custom'),
+          const _SectionTitle('Customization'),
           _ButtonTile(
             icon: Icons.palette_outlined,
             title: 'Custom styled',
-            subtitle: 'Uses a custom AsyncConfirmDialogStyle.',
+            subtitle: 'Custom colors, corners, and icon.',
             onTap: () async {
               final confirmed = await AppDialog.confirm(
                 context,
@@ -167,6 +194,99 @@ class _DemoScreenState extends State<DemoScreen> {
               );
               if (confirmed == true) {
                 _setStatus('You liked the custom dialog.');
+              }
+            },
+          ),
+          _ButtonTile(
+            icon: Icons.phone_iphone,
+            title: 'Cupertino style',
+            subtitle: 'Native CupertinoDialogAction controls.',
+            onTap: () async {
+              final confirmed = await context.confirm(
+                title: 'Cupertino look',
+                message: 'Rendered with real CupertinoDialogAction buttons.',
+                confirmText: 'OK',
+                platform: DialogPlatform.cupertino,
+              );
+              if (confirmed == true) {
+                _setStatus('Cupertino dialog confirmed.');
+              }
+            },
+          ),
+          _ButtonTile(
+            icon: Icons.favorite_border,
+            title: 'With icon',
+            subtitle: 'A custom icon sits above the title.',
+            onTap: () async {
+              final confirmed = await AppDialog.confirm(
+                context,
+                icon: const Icon(Icons.favorite, color: Colors.pink),
+                title: 'Free trial ending?',
+                message: 'Your free trial ends in two days.',
+                confirmText: 'Keep me updated',
+              );
+              if (confirmed == true) {
+                _setStatus('You will be notified.');
+              }
+            },
+          ),
+          _ButtonTile(
+            icon: Icons.not_interested,
+            title: 'No cancel button',
+            subtitle: 'Forced choice; only the confirm action is shown.',
+            onTap: () async {
+              final confirmed = await context.confirm(
+                title: 'Enable notifications?',
+                message: 'You can change this later in Settings.',
+                confirmText: 'Enable',
+                showCancelButton: false,
+                barrierDismissible: false,
+              );
+              if (confirmed == true) {
+                _setStatus('Notifications enabled.');
+              }
+            },
+          ),
+          _ButtonTile(
+            icon: Icons.timer_outlined,
+            title: 'Loading label',
+            subtitle: 'Custom text next to the spinner.',
+            onTap: () async {
+              final confirmed = await context.confirm(
+                title: 'Generate report?',
+                message: 'This can take a few seconds.',
+                confirmText: 'Generate',
+                loadingText: 'Generating...',
+                onConfirm: () => _fakeWork(const Duration(seconds: 3)),
+              );
+              if (confirmed == true) {
+                _setStatus('Report generated.');
+              }
+            },
+          ),
+          const SizedBox(height: 8),
+          const _SectionTitle('Custom content'),
+          _ButtonTile(
+            icon: Icons.widgets_outlined,
+            title: 'Embedded widget',
+            subtitle: 'Any widget can be placed in the dialog body.',
+            onTap: () async {
+              final confirmed = await context.confirm(
+                title: 'Publish?',
+                message: 'Do you want to publish these changes?',
+                confirmText: 'Publish',
+                content: Container(
+                  height: 44,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text('Private note - visible to teammates'),
+                ),
+              );
+              if (confirmed == true) {
+                _setStatus('Published.');
               }
             },
           ),

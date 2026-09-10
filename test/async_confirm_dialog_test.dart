@@ -60,6 +60,10 @@ void main() {
     expect(find.text('Are you sure?'), findsOneWidget);
     expect(find.text('Delete'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);
+    // The confirm action is a filled button so its label stays readable.
+    expect(find.byType(FilledButton), findsOneWidget);
+    final confirmButton = tester.widget<FilledButton>(find.byType(FilledButton));
+    expect(confirmButton.onPressed, isNotNull);
 
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
@@ -139,6 +143,39 @@ void main() {
     expect(capturedError, isA<StateError>());
     expect(find.text('Action failed. Try again.'), findsOneWidget);
     expect(find.text('Delete'), findsOneWidget);
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(await future, isFalse);
+  });
+
+  testWidgets('shows a readable message when the async action fails late',
+      (tester) async {
+    await tester.pumpWidget(_buildApp());
+
+    final future = openDialog(
+      tester,
+      args: DialogArgs(
+        onConfirm: () async {
+          await Future<void>.delayed(const Duration(seconds: 1));
+          throw StateError('Server refused the request');
+        },
+      ),
+    )();
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Delete'));
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
+
+    // No unhandled exception leaked to the framework.
+    expect(tester.takeException(), isNull);
+    // The "Bad state:" prefix is stripped; only the readable message is shown.
+    expect(find.text('Server refused the request'), findsOneWidget);
+    expect(find.textContaining('Bad state'), findsNothing);
 
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();

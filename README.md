@@ -10,6 +10,12 @@ APIs: deletes, logouts, saves, updates. Standard dialogs force you to manually
 manage loading states, disable buttons, and guard against double-taps. This
 package handles all of that for you.
 
+## Demo
+
+![async_confirm_dialog demo](assets/demo.gif)
+
+Recorded demo of the example app running on iOS and Android.
+
 ## Highlights
 
 - Zero-boilerplate API. One call returns a `Future<bool?>`.

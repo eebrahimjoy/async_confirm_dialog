@@ -16,6 +16,7 @@ class ConfirmDialogBody extends StatelessWidget {
     this.messageTextStyle,
     this.messageColor,
     this.errorTextStyle,
+    this.errorColor,
   });
 
   /// Optional descriptive message shown above [content].
@@ -39,6 +40,11 @@ class ConfirmDialogBody extends StatelessWidget {
   /// Style applied to [errorText].
   final TextStyle? errorTextStyle;
 
+  /// Colour applied to [errorText] when [errorTextStyle] has no colour.
+  ///
+  /// Defaults to the Material theme's error colour.
+  final Color? errorColor;
+
   /// Whether the body has anything to render.
   bool get isEmpty =>
       (message == null || message!.trim().isEmpty) &&
@@ -59,7 +65,7 @@ class ConfirmDialogBody extends StatelessWidget {
     final effectiveErrorStyle = (errorTextStyle ??
             theme.textTheme.bodySmall ??
             const TextStyle())
-        .copyWith(color: theme.colorScheme.error);
+        .copyWith(color: errorColor ?? theme.colorScheme.error);
 
     final hasMessage = message != null && message!.trim().isNotEmpty;
     final hasError = errorText != null && errorText!.trim().isNotEmpty;
