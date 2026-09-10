@@ -12,9 +12,14 @@ package handles all of that for you.
 
 ## Demo
 
-![async_confirm_dialog demo](assets/demo.gif)
+The example app running on iOS:
 
-Recorded demo of the example app running on iOS and Android.
+| Demo 1 | Demo 2 |
+| ------ | ------ |
+| ![async_confirm_dialog demo](assets/gif/example1.gif) | ![async_confirm_dialog demo](assets/gif/example2.gif) |
+
+Tap any tile in the example to try the dialogs: standard confirms, destructive
+actions, async failures, and fully custom styles.
 
 ## Highlights
 
