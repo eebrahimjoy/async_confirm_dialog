@@ -3,7 +3,7 @@ description: >-
   A zero-boilerplate, async-aware confirmation dialog for Flutter. Handles
   loading states, double-tap prevention, and errors natively with adaptive
   Material and Cupertino designs.
-version: 1.0.1
+version: 1.0.2
 repository: https://github.com/eebrahimjoy/async_confirm_dialog
 issue_tracker: https://github.com/eebrahimjoy/async_confirm_dialog/issues
 homepage: https://github.com/eebrahimjoy/async_confirm_dialog
